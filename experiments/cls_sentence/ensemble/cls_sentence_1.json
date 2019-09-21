@@ -1,0 +1,70 @@
+{
+  "dataset_reader": {
+        "type": "bert_seq_pair_cls",
+        "tokenizers":{
+            "bert_tokenizer":{
+                "type": "char_bert_tokenizer",
+                "vocab_file":"/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+            }
+        },
+        "token_indexers":{
+            "bert":{
+                "type": "char_bert_token_indexer",
+                "vocab_file": "/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+            }
+        }
+    },
+  "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence/train_1.jsonl",
+  "validation_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence/dev_1.jsonl",
+  "model": {
+    "type": "bert_seq_pair_clf",
+    "text_field_embedder": {
+            "allow_unmatched_keys": true,
+            "embedder_to_indexer_map": {
+                "bert": ["bert", null, "bert-type-ids"]
+            },
+            "token_embedders": {
+                "bert": {
+                    "type": "bert-pretrained",
+                    "pretrained_model": "/home/whou/workspace/chinese_wwm_ext_pytorch/",
+                    "requires_grad": true,
+                    "top_layer_only": true
+                }
+            }
+    },
+    "classifier_feedforward": {
+      "input_dim": 768,
+      "num_layers": 1,
+      "hidden_dims": [
+        2
+      ],
+      "activations": [
+        "linear"
+      ]
+    }
+  },
+  "iterator": {
+    "type": "bucket",
+    "batch_size": 8,
+    "max_instances_in_memory": 600,
+    "sorting_keys": [
+      [
+        "content",
+        "num_tokens"
+      ]
+    ]
+  },
+  "trainer": {
+    "num_epochs": 6,
+    "grad_norm": 5,
+    "patience": 2,
+    "validation_metric": "+accuracy",
+    "cuda_device": 1,
+    "optimizer": {
+      "type": "bert_adam",
+      "lr": 2e-5,
+      "warmup": 0.1,
+      "t_total": 15000
+    }
+  }
+}
