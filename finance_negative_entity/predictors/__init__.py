@@ -10,4 +10,4 @@
 这一行开始写关于本文件的说明与解释
 """
 
-from finance_negative_entity.predictors.bert_crf_predictor import BertCrfPredictor
+from finance_negative_entity.predictors.bert_seq_pair_cls import BertSeqPairClsPredictor
