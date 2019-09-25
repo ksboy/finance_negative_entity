@@ -31,7 +31,7 @@ class BertSeqPairReader(DatasetReader):
                  lazy: bool = False,
                  ) -> None:
         super().__init__(lazy)
-        self._tokenizer = tokenizers.get("bert_tokenizer")
+        self._tokenizer = tokenizers.get("xlnet_tokenizer")
         self._token_indexers = token_indexers
         self.oov_tokens = {
             "“": '"',
