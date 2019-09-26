@@ -34,7 +34,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
         for row in reader:
             if (len(row['text']) >512):
                 print(row['\ufeffid'], len(row['text']))
-            row['text'] =row['text'][:450]
+            row['text'] =row['text']
             if level == 'sentence':
                 item ={}
                 item['passage'] = row['text']
@@ -48,7 +48,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 for entity in row['entity'].split(";"):
                     item ={}
                     item['passage'] = row['text']
-                    item['question'] = entity + "不好"
+                    item['question'] = entity 
                     if entity in row['key_entity']:
                         item['label'] = '正类'
                     else:
@@ -84,10 +84,10 @@ def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
         for row in reader:
             item ={}
             item['id']=row['\ufeffid']
-            item['passage'] = row['text'][:450]
+            item['passage'] = row['text']
             item['question_list'] =[]
             for entity in row['entity'].split(";"):
-                item['question_list'].append(entity+"不好")
+                item['question_list'].append(entity)
                 # item['label'] = '正类'
             items.append(item)
     write_file(items, output_file)
@@ -97,9 +97,9 @@ def func():
     #               output_dir="../processed_data/ensemble_data/cls_sentence/",
     #               num_split=5, if_shuffle= False,level='sentence')
     
-    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-    #               output_dir="../processed_data/ensemble_data/cls_entity/",
-    #               num_split=5, if_shuffle= False,level='entity')
+    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
+                  output_dir="../processed_data/ensemble_data/cls_entity/",
+                  num_split=5, if_shuffle= False,level='entity')
 
     gen_test_data(input_file="../processed_data/Test_Data.csv", 
                   output_file="../processed_data/test.jsonl")

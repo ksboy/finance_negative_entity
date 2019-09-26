@@ -4,31 +4,28 @@
         "tokenizers":{
             "xlnet_tokenizer":{
                 "type": "pretrained_transformer",
-                "model_name":"/home/whou/workspace/chinese_xlnet_mid_pytorch/",
+                "model_name":"/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/",
                 "do_lowercase": true
             }
         },
         "token_indexers":{
           "xlnet": {
             "type": "pretrained_transformer",
-            "model_name": "/home/whou/workspace/chinese_xlnet_mid_pytorch/",
+            "model_name": "/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/",
             "do_lowercase": true
           }
         }
     },
-  "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_1.jsonl",
-  "validation_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_1.jsonl",
+  "train_data_path": "/home/minghongxia/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_1.jsonl",
+  "validation_data_path": "/home/minghongxia/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_1.jsonl",
   "model": {
     "type": "bert_seq_pair_clf",
     "text_field_embedder": {
             "allow_unmatched_keys": true,
-            "embedder_to_indexer_map": {
-              "xlnet": ["xlnet", null, "xlnet-type-ids"]
-          },
             "token_embedders": {
               "xlnet": {
                     "type": "pretrained_transformer",
-                    "model_name":  "/home/whou/workspace/chinese_xlnet_mid_pytorch/"
+                    "model_name":  "/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/"
               }
         
             }

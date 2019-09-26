@@ -2,34 +2,32 @@
   "dataset_reader": {
         "type": "bert_seq_pair_cls",
         "tokenizers":{
-            "bert_tokenizer":{
-                "type": "char_bert_tokenizer",
-                "vocab_file":"/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+            "xlnet_tokenizer":{
+                "type": "pretrained_transformer",
+                "model_name":"/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/",
+                "do_lowercase": true
             }
         },
         "token_indexers":{
-            "bert":{
-                "type": "char_bert_token_indexer",
-                "vocab_file": "/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
-            }
+          "xlnet": {
+            "type": "pretrained_transformer",
+            "model_name": "/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/",
+            "do_lowercase": true
+          }
         }
     },
-  "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_4.jsonl",
-  "validation_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_4.jsonl",
+  "train_data_path": "/home/minghongxia/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_4.jsonl",
+  "validation_data_path": "/home/minghongxia/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_4.jsonl",
   "model": {
     "type": "bert_seq_pair_clf",
     "text_field_embedder": {
             "allow_unmatched_keys": true,
-            "embedder_to_indexer_map": {
-                "bert": ["bert", null, "bert-type-ids"]
-            },
             "token_embedders": {
-                "bert": {
-                    "type": "bert-pretrained",
-                    "pretrained_model": "/home/whou/workspace/chinese_wwm_ext_pytorch/",
-                    "requires_grad": true,
-                    "top_layer_only": true
-                }
+              "xlnet": {
+                    "type": "pretrained_transformer",
+                    "model_name":  "/home/minghongxia/whou/workspace/chinese_xlnet_mid_pytorch/"
+              }
+        
             }
     },
     "classifier_feedforward": {
@@ -59,7 +57,7 @@
     "grad_norm": 5,
     "patience": 2,
     "validation_metric": "+accuracy",
-    "cuda_device": [0, 1],
+    "cuda_device": 0,
     "optimizer": {
       "type": "bert_adam",
       "lr": 2e-5,
