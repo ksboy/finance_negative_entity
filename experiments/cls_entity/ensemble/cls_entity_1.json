@@ -14,7 +14,6 @@
             "model_name": "/home/whou/workspace/chinese_xlnet_mid_pytorch/",
             "do_lowercase": true
           }
-    
         }
     },
   "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_1.jsonl",
@@ -28,10 +27,8 @@
           },
             "token_embedders": {
               "xlnet": {
-                "pretrained_transformer":{
                     "type": "pretrained_transformer",
                     "model_name":  "/home/whou/workspace/chinese_xlnet_mid_pytorch/"
-                }
               }
         
             }
