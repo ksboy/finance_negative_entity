@@ -4,18 +4,18 @@
         "tokenizers":{
             "bert_tokenizer":{
                 "type": "char_bert_tokenizer",
-                "vocab_file":"/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file":"/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         },
         "token_indexers":{
             "bert":{
                 "type": "char_bert_token_indexer",
-                "vocab_file": "/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         }
     },
-  "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_1.jsonl",
-  "validation_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_1.jsonl",
+  "train_data_path": "/home/mhxia/xmh/BIDF/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_singleEntity/train_1.jsonl",
+  "validation_data_path": "/home/mhxia/xmh/BIDF/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_singleEntity/dev_1.jsonl",
   "model": {
     "type": "bert_seq_pair_clf",
     "text_field_embedder": {
@@ -26,7 +26,7 @@
             "token_embedders": {
                 "bert": {
                     "type": "bert-pretrained",
-                    "pretrained_model": "/home/whou/workspace/chinese_wwm_ext_pytorch/",
+                    "pretrained_model": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch",
                     "requires_grad": true,
                     "top_layer_only": true
                 }
@@ -59,10 +59,10 @@
     "grad_norm": 5,
     "patience": 2,
     "validation_metric": "+accuracy",
-    "cuda_device": [0,1],
+    "cuda_device": [0,1,2],
     "optimizer": {
       "type": "bert_adam",
-      "lr": 2e-5,
+      "lr": 1e-5,
       "warmup": 0.1,
       "t_total": 15000
     }

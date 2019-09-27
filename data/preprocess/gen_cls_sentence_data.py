@@ -12,20 +12,20 @@
 import json, csv, os
 from typing import List
 from enum import Enum, unique
-from allennlp.models.archival import load_archive
-from allennlp.predictors import Predictor
+# from allennlp.models.archival import load_archive
+# from allennlp.predictors import Predictor
 import copy
 import random
 
 
 def write_file(datas, output_file):
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, 'w+', encoding='utf-8') as f:
         for obj in datas:
             json.dump(obj, f, ensure_ascii=False)
             f.write("\n")
             
 def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv", 
-                               output_dir="../processed_data/ensemble_data/cls_entity/", 
+                               output_dir="../processed_data/ensemble_data/cls_entity_singleEntity/", 
                                num_split=5, if_shuffle =False, level="sentence"):
     items= []
     with open(input_file, encoding='utf-8') as csvfile:
@@ -34,7 +34,8 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
         for row in reader:
             if (len(row['text']) >512):
                 print(row['\ufeffid'], len(row['text']))
-            row['text'] =row['text'][:450]
+            context = row['title'] + row['text'] #把title和text合并
+            row['text'] =context[:450]
             if level == 'sentence':
                 item ={}
                 item['passage'] = row['text']
@@ -48,7 +49,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 for entity in row['entity'].split(";"):
                     item ={}
                     item['passage'] = row['text']
-                    item['question'] = entity + "不好"
+                    item['question'] = entity
                     if entity in row['key_entity']:
                         item['label'] = '正类'
                     else:
@@ -70,10 +71,29 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 globals()["train_data" + str(j + 1)].append(item)
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
+        print("ok")
     for i in range(num_split):
         write_file(globals()["train_data" + str(i + 1)], os.path.join(output_dir, "train_" + str(i + 1) + ".jsonl"))
         write_file(globals()["dev_data" + str(i + 1)], os.path.join(output_dir, "dev_" + str(i + 1) + ".jsonl"))
 
+
+# def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
+#                   output_file="../processed_data/test.jsonl"):
+#     items= []
+#     with open(input_file, encoding='utf-8') as csvfile:
+#         reader = csv.DictReader(csvfile)
+#         title = reader.fieldnames
+#         for row in reader:
+#             item ={}
+#             item['id']=row['\ufeffid']
+#             context = row['title'] + row['text']
+#             item['passage'] = context[:450]
+#             item['question_list'] =[]
+#             for entity in row['entity'].split(";"):
+#                 item['question_list'].append(entity+"不好")
+#                 # item['label'] = '正类'
+#             items.append(item)
+#     write_file(items, output_file)
 
 def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
                   output_file="../processed_data/test.jsonl"):
@@ -82,27 +102,28 @@ def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
         reader = csv.DictReader(csvfile)
         title = reader.fieldnames
         for row in reader:
-            item ={}
-            item['id']=row['\ufeffid']
-            item['passage'] = row['text'][:450]
-            item['question_list'] =[]
             for entity in row['entity'].split(";"):
-                item['question_list'].append(entity+"不好")
-                # item['label'] = '正类'
-            items.append(item)
+                item ={}
+                item['id']=row['\ufeffid']
+                context = row['title'] + row['text']
+                item['passage'] = context[:450]
+                item['question'] =entity+"不好"
+                item['label'] = '正类'
+                items.append(item)
     write_file(items, output_file)
+
 
 def func():
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/cls_sentence/",
     #               num_split=5, if_shuffle= False,level='sentence')
     
-    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-    #               output_dir="../processed_data/ensemble_data/cls_entity/",
-    #               num_split=5, if_shuffle= False,level='entity')
+    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
+                  output_dir="../processed_data/ensemble_data/cls_entity_singleEntity/",
+                  num_split=5, if_shuffle= True,level='entity')
 
-    gen_test_data(input_file="../processed_data/Test_Data.csv", 
-                  output_file="../processed_data/test.jsonl")
+    # gen_test_data(input_file="../processed_data/Test_Data.csv", 
+    #               output_file="../processed_data/test.jsonl")
 
     pass
 

@@ -46,9 +46,9 @@ class BertSeqPairClsEngine(object):
         result = self.predictor.predict(passage=passage.rstrip(), question=question)
         return result['label']
 
-CLS_ENTITY_MODEL_DIR = "/home/whou/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_"
-CUDA_DEVICE = 0
-NUM_CLS_ENTITY_MODELS = 1
+CLS_ENTITY_MODEL_DIR = "~/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_RoBERTa_singleEntity_"
+CUDA_DEVICE = 1
+NUM_CLS_ENTITY_MODELS = 5
 
 class ClsEntity(object):
     def __init__(self):
@@ -86,12 +86,13 @@ class ClsEntity(object):
             for row in reader:
                 item ={}
                 item['id']=row['\ufeffid']
-                item['passage'] = row['text'][:450]
+                context = row['title'] + row['text']
+                item['passage'] = context[:450]
                 item['entity_list'] =[]
                 item['question_list'] =[]
                 for entity in row['entity'].split(";"):
                     item['entity_list'].append(entity)
-                    item['question_list'].append(entity+"不好")
+                    item['question_list'].append(entity)
                 items.append(item)
         
         outputs=[]
@@ -116,14 +117,14 @@ class ClsEntity(object):
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write("id,negative,key_entity\n")
             for item in outputs:
-                f.write(item['id'] + ',' + str(item['negative'])+ ',' + ';'.join(item['entity_list']))
+                f.write(item['id'] + ',' + str(item['negative'])+ ',' + ';'.join(item['entity']))
                 f.write("\n")
     
 
 def func():
     cls_entity = ClsEntity()
     input_file  = '../data/processed_data/Test_Data.csv'
-    output_file = '../data/results/result.csv'
+    output_file = '../data/results/result_RoBERTa.csv'
     cls_entity.predict(input_file, output_file)
     pass
 
