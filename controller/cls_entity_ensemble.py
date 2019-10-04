@@ -46,7 +46,7 @@ class BertSeqPairClsEngine(object):
         result = self.predictor.predict(passage=passage.rstrip(), question=question)
         return result['label']
 
-CLS_ENTITY_MODEL_DIR = "~/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_RoBERTa_singleEntity_"
+CLS_ENTITY_MODEL_DIR = "~/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_BERT_ReLU_1"
 CUDA_DEVICE = 1
 NUM_CLS_ENTITY_MODELS = 5
 
@@ -67,7 +67,8 @@ class ClsEntity(object):
 
         self.cls_entity_predictor_pool = []
         for i in range(NUM_CLS_ENTITY_MODELS):
-            model_path = os.path.join(CLS_ENTITY_MODEL_DIR+str(i+1), "model.tar.gz")
+            # model_path = os.path.join(CLS_ENTITY_MODEL_DIR+str(i+1), "model.tar.gz")
+            model_path = os.path.join(CLS_ENTITY_MODEL_DIR, "model.tar.gz")
             model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf", CUDA_DEVICE)
             self.cls_entity_predictor_pool.append(model)
 
@@ -92,7 +93,7 @@ class ClsEntity(object):
                 item['question_list'] =[]
                 for entity in row['entity'].split(";"):
                     item['entity_list'].append(entity)
-                    item['question_list'].append(entity)
+                    item['question_list'].append(entity+"不好")
                 items.append(item)
         
         outputs=[]
@@ -124,7 +125,7 @@ class ClsEntity(object):
 def func():
     cls_entity = ClsEntity()
     input_file  = '../data/processed_data/Test_Data.csv'
-    output_file = '../data/results/result_RoBERTa.csv'
+    output_file = '../data/results/result_BERT_Relu2.csv'
     cls_entity.predict(input_file, output_file)
     pass
 
