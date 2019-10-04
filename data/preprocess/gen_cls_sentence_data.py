@@ -143,13 +143,13 @@ def gen_test_data(input_file="../processed_data/Test_Data.csv",
 
 
 def func():
-    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-    #               output_dir="../processed_data/ensemble_data/cls_sentence/",
-    #               num_split=5, if_shuffle= False,level='sentence')
-
     gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
-                            output_dir="../processed_data/ensemble_data/cls_entity_cleansed/",
-                            num_split=5, if_shuffle=True, level='entity')
+                  output_dir="../processed_data/ensemble_data/cls_sentence/",
+                  num_split=5, if_shuffle= True,level='sentence')
+
+    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
+    #                         output_dir="../processed_data/ensemble_data/cls_entity_cleansed/",
+    #                         num_split=5, if_shuffle=True, level='entity')
 
     # gen_test_data(input_file="../processed_data/Test_Data.csv", 
     #               output_file="../processed_data/test.jsonl")
