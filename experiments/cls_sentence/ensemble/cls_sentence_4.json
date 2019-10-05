@@ -45,7 +45,7 @@
   },
   "iterator": {
     "type": "bucket",
-    "batch_size": 16,
+    "batch_size": 4,
     "max_instances_in_memory": 600,
     "sorting_keys": [
       [
@@ -58,8 +58,9 @@
     "num_epochs": 6,
     "grad_norm": 5,
     "patience": 2,
+    "num_serialized_models_to_keep": 1,
     "validation_metric": "+accuracy",
-    "cuda_device": 0,
+    "cuda_device": 1,
     "optimizer": {
       "type": "bert_adam",
       "lr": 2e-5,

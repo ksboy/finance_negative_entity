@@ -58,7 +58,8 @@
     "num_epochs": 6,
     "grad_norm": 5,
     "patience": 2,
-    "validation_metric": "+accuracy",
+    "num_serialized_models_to_keep": 1,
+    "validation_metric": "+f1",
     "cuda_device": [0, 1],
     "optimizer": {
       "type": "bert_adam",
