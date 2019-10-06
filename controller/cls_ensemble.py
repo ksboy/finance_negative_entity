@@ -22,9 +22,7 @@ import time
 from tqdm import tqdm
 import os
 import json, csv
-from scripts.check_file_format import check_submit
 from scripts.ensemble import cls_entity_ensemble
-from scripts.evaluate import Evaluator
 import logging
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
@@ -36,7 +34,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 class BertSeqPairClsEngine(object):
     def __init__(self, model_path: str, predictor_type: str, cuda_device: int = -1):
         self.predictor_type = predictor_type
@@ -47,30 +44,26 @@ class BertSeqPairClsEngine(object):
         return result['label']
 
 CLS_ENTITY_MODEL_DIR = "/home/whou/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_"
-CUDA_DEVICE = 0
-NUM_CLS_ENTITY_MODELS = 1
+CLS_SENTENCE_MODEL_DIR = "/home/whou/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_"
+CLS_ENTITY_CUDA_DEVICE = 0
+CLS_SENTENCE_CUDA_DEVICE = 1
+NUM_CLS_ENTITY_MODELS = 5
+NUM_CLS_SENTENCE_MODELS = 5
 
 class ClsEntity(object):
     def __init__(self):
-        # logger.info("model init begin...")
-        # t1 = time.time()
-        # self.ner_predictor = CharBertCrfEngine(NER_MODEL_DIR, "bert_crf_predictor", CUDA_DEVICE)
-        # logger.info("ner model init end.")
-        # self.cls_labels_predictor = BertSeqPairClsEngine(CLS_LABELS_MODEL_DIR, "bert_seq_pair_clf", CUDA_DEVICE)
-        # logger.info("cls_labels model init end.")
-        # self.cls_categories_predictor = BertSeqPairClsEngine(CLS_CATEGORIES_MODEL_DIR, "bert_seq_pair_clf", CUDA_DEVICE)
-        # logger.info("cls_categories model init end.")
-        # self.cls_polarities_predictor = BertSeqPairClsEngine(CLS_POLARITIES_MODEL_DIR,"bert_seq_pair_clf", CUDA_DEVICE)
-        # logger.info("cls_polarities model init end.")
-        # t2 = time.time()
-        # logger.info("model init complete, cost time %.2f s" % (t2 - t1))
 
         self.cls_entity_predictor_pool = []
         for i in range(NUM_CLS_ENTITY_MODELS):
             model_path = os.path.join(CLS_ENTITY_MODEL_DIR+str(i+1), "model.tar.gz")
-            model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf", CUDA_DEVICE)
+            model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf", CLS_ENTITY_CUDA_DEVICE)
             self.cls_entity_predictor_pool.append(model)
-
+        
+        self.cls_sentence_predictor_pool = []
+        for i in range(NUM_CLS_SENTENCE_MODELS):
+            model_path = os.path.join(CLS_SENTENCE_MODEL_DIR+str(i+1), "model.tar.gz")
+            model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf", CLS_SENTENCE_CUDA_DEVICE)
+            self.cls_sentence_predictor_pool.append(model)
 
     def predict(self, input_file, output_file):
         """
@@ -79,19 +72,17 @@ class ClsEntity(object):
         :param passage:
         :return:
         """
-        with open(input_file, encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            title = reader.fieldnames
+        with open(input_file, encoding='utf-8') as infile:
             items=[]
-            for row in reader:
+            for row in infile:
+                row = json.loads(row)
                 item ={}
-                item['id']=row['\ufeffid']
-                item['passage'] = row['text'][:450]
+                item['id']=row['id']
+                item['passage'] = row['passage']
                 item['entity_list'] =[]
-                item['question_list'] =[]
-                for entity in row['entity'].split(";"):
+                for entity in row['entity']:
                     item['entity_list'].append(entity)
-                    item['question_list'].append(entity+"不好")
+                # print(item)
                 items.append(item)
         
         outputs=[]
@@ -99,16 +90,27 @@ class ClsEntity(object):
             # item =json.loads(item)
             passage=item['passage']
             negative_entity_list=[]
-            for i, question in enumerate(item['question_list']):
-                label_ensemble = []
-                for model in self.cls_entity_predictor_pool:
-                    # print(passage, question)
-                    label_ensemble.append(model.predict(passage, question))
-                label = cls_entity_ensemble(label_ensemble)
-                if label=="正类":
-                    negative_entity_list.append(item['entity_list'][i])
             output_item ={}
             output_item['id'] = item['id']
+
+            sentence_label_ensemble = []
+            for model in self.cls_sentence_predictor_pool:
+                sentence_label_ensemble.append(model.predict(passage[:512-3-2], ""))
+            sentence_label = cls_entity_ensemble(sentence_label_ensemble)
+            if sentence_label == "负类":
+                output_item['entity'] = []
+                output_item['negative'] = 0 
+            else:
+                # print("cls_entity")
+                for i, entity in enumerate(item['entity_list']):
+                    entity_label_ensemble = []
+                    for model in self.cls_entity_predictor_pool:
+                        entity_label_ensemble.append(model.predict(passage[:512-3-2-len(entity)], entity))
+                    entity_label = cls_entity_ensemble(entity_label_ensemble)
+                    if entity_label=="正类":
+                        negative_entity_list.append(entity)
+                # print(negative_entity_list)
+               
             output_item['entity'] = negative_entity_list
             output_item['negative'] = 0 if len(negative_entity_list)==0 else 1
             outputs.append(output_item)
@@ -116,13 +118,13 @@ class ClsEntity(object):
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write("id,negative,key_entity\n")
             for item in outputs:
-                f.write(item['id'] + ',' + str(item['negative'])+ ',' + ';'.join(item['entity_list']))
+                f.write(item['id'] + ',' + str(item['negative'])+ ',' + ';'.join(item['entity']))
                 f.write("\n")
     
 
 def func():
     cls_entity = ClsEntity()
-    input_file  = '../data/processed_data/Test_Data.csv'
+    input_file  = '../data/processed_data/test.jsonl'
     output_file = '../data/results/result.csv'
     cls_entity.predict(input_file, output_file)
     pass

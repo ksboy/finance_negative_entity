@@ -76,29 +76,21 @@ def gen_cleansed_data(text, entityList):
     # print(res)
     return res
 
-def get_entityList(input_file_1="../processed_data/Train_Data.csv", input_file_2="../processed_data/Test_Data.csv",):
+def get_entityList(input_file="../processed_data/Train_Data.csv"):
     entityList = []
-    with open(input_file_1, encoding='utf-8') as csvfile:
+    with open(input_file, encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             for entity in row['entity'].split(";"):
                 if entity not in entityList:
                     entityList.append(entity)
                     jieba.add_word(entity, freq=None, tag=None)  # 向jieba字典中加入实体
-    with open(input_file_2, encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            for entity in row['entity'].split(";"):
-                if entity not in entityList:
-                    entityList.append(entity)
-                    jieba.add_word(entity, freq=None, tag=None)  # 向jieba字典中加入实体
-
     return entityList
 
 
 def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv", 
                                output_dir="../processed_data/ensemble_data/cls_entity/", 
-                               num_split=5, if_shuffle =False, level="cls_entity"):
+                               num_split=5, if_shuffle =False, type="cls_entity"):
     items= []
     entity_length = []
     count = 0
@@ -110,7 +102,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 row['text'] += row['title']
             row['text'] = gen_cleansed_data(row['text'], row['entity'].split(";"))  # 清洗数据
             entity_length.extend([len(entity) for entity in row['entity'].split(";")])
-            if level == 'cls_sentence':
+            if type == 'cls_sentence':
                 if len(row['text']) > 512-3-2:
                     count += 1
                 item ={}
@@ -121,7 +113,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 else:
                     item['label'] = '正类'
                 items.append(item)
-            elif level=="cls_entity":
+            elif type=="cls_entity":
                 for entity in row['entity'].split(";"):
                     if len(row['text']) + len(entity) > 512-3-2:
                         count += 1
@@ -133,7 +125,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                     else:
                         item['label'] = '负类'
                     items.append(item)
-            elif level=="ner":
+            elif type=="ner":
                 if len(row['text']) > 512-3-2:
                     count += 1
                 item ={}
@@ -156,7 +148,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
  
                     
     print("max(entity_length)", max(entity_length))
-    print("out_of_max_length", count)
+    print("count(out_of_max_length)", count)
     if if_shuffle:
         random.shuffle(items)
     
@@ -178,40 +170,52 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
 
 
 def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
-                  output_file="../processed_data/test.jsonl"):
+                  output_file="../processed_data/test_entity.jsonl",
+                  type="cls_entity"):
     items= []
+    entity_length=[]
+    count = 0
     with open(input_file, encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         title = reader.fieldnames
         for row in reader:
+            if row['title'] not in row['text']:
+                row['text'] += row['title']
+            row['text'] = gen_cleansed_data(row['text'], row['entity'].split(";"))  # 清洗数据
+            entity_length.extend([len(entity) for entity in row['entity'].split(";")])
+            if len(row['text']) > 512-3-2:
+                count += 1
             item ={}
             item['id']=row['\ufeffid']
-            item['passage'] = row['text'][:480]
-            item['question_list'] =[]
+            item['passage'] = row['text']
+            item['entity'] = []
             for entity in row['entity'].split(";"):
-                item['question_list'].append(entity)
-                # item['label'] = '正类'
+                item['entity'].append(entity)
             items.append(item)
+
+    print("max(entity_length)", max(entity_length))
+    print("count(out_of_max_length)", count)
     write_file(items, output_file)
 
 def func():
 
-    get_entityList()
+    get_entityList(input_file="../processed_data/Train_Data.csv")
+    get_entityList(input_file="../processed_data/Test_Data.csv")
 
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/cls_sentence/",
-    #               num_split=5, if_shuffle= False,level='cls_sentence')
+    #               num_split=5, if_shuffle= False,type='cls_sentence')
     
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/cls_entity/",
-    #               num_split=5, if_shuffle= False,level='cls_entity')
+    #               num_split=5, if_shuffle= False,type='cls_entity')
 
-    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-                  output_dir="../processed_data/ensemble_data/ner/",
-                  num_split=5, if_shuffle= False,level='ner')
+    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
+    #               output_dir="../processed_data/ensemble_data/ner/",
+    #               num_split=5, if_shuffle= False,type='ner')
 
-    # gen_test_data(input_file="../processed_data/Test_Data.csv", 
-    #               output_file="../processed_data/test.jsonl")
+    gen_test_data(input_file="../processed_data/Test_Data.csv", 
+                  output_file="../processed_data/test.jsonl")
 
     pass
 

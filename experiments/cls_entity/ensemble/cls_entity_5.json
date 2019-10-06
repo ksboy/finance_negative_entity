@@ -46,6 +46,18 @@
   "iterator": {
     "type": "bucket",
     "batch_size": 4,
+    "instances_per_epoch": 3000,
+    "max_instances_in_memory": 600,
+    "sorting_keys": [
+      [
+        "content",
+        "num_tokens"
+      ]
+    ]
+  },
+  "validation_iterator": {
+    "type": "bucket",
+    "batch_size": 4,
     "max_instances_in_memory": 600,
     "sorting_keys": [
       [
@@ -55,12 +67,12 @@
     ]
   },
   "trainer": {
-    "num_epochs": 6,
+    "num_epochs": 10,
     "grad_norm": 5,
-    "patience": 2,
+    "patience": 3,
     "num_serialized_models_to_keep": 1,
     "validation_metric": "+f1",
-    "cuda_device": [0, 1],
+    "cuda_device": 1,
     "optimizer": {
       "type": "bert_adam",
       "lr": 2e-5,
