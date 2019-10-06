@@ -106,6 +106,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 if len(row['text']) > 512-3-2:
                     count += 1
                 item ={}
+                item['id']=row['\ufeffid']
                 item['passage'] = row['text'][:512-3-2]
                 item['question'] = ''
                 if row['negative'] == "0":
@@ -118,6 +119,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                     if len(row['text']) + len(entity) > 512-3-2:
                         count += 1
                     item ={}
+                    item['id']=row['\ufeffid']
                     item['passage'] = row['text'][:512-3-2-len(entity)]
                     item['question'] = entity
                     if entity in row['key_entity']:
@@ -129,6 +131,7 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                 if len(row['text']) > 512-3-2:
                     count += 1
                 item ={}
+                item['id']=row['\ufeffid']
                 item['passage'] = row['text'][:512-3-2]
                 item['key_entity'] = []
                 item['entity'] = []
@@ -197,10 +200,53 @@ def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
     print("count(out_of_max_length)", count)
     write_file(items, output_file)
 
+
+def inspect_data(input_file="../processed_data/Train_Data.csv"):
+    with open(input_file, encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        title = reader.fieldnames
+        count = 0
+        for row in reader:
+            # print(row)
+            entity_list = row["key_entity"].split(";")
+            for i in range(len(entity_list)):
+                for j in range(i+1, len(entity_list)):
+                    if entity_list[i] in entity_list[j]:
+                        count +=1
+                        print(row["id"], entity_list[i] , entity_list[j])
+                        # print(row["\ufeffid"], entity_list[i] , entity_list[j])
+    print(count)
+
+def postprocess(input_file, output_file):
+
+    outfile = open(output_file, 'w', encoding='utf-8')
+    
+    with open(input_file, encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        title = reader.fieldnames
+        writer= csv.DictWriter(outfile, title)
+
+        count = 0
+        for row in reader:
+            print(row)
+            pop_index=[]
+            entity_list = row["key_entity"].split(";")
+            for i in range(len(entity_list)):
+                for j in range(i+1, len(entity_list)):
+                    if entity_list[i] in entity_list[j]:
+                        if row["text"].count(entity_list[i]) == row["text"].count(entity_list[j]):
+                            count +=1
+                            pop_index.append(i)
+            entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
+            row["key_entity"]=  ";".join(entity_list)
+            writer.writerow(row)
+    
+    print(count)
+
 def func():
 
-    get_entityList(input_file="../processed_data/Train_Data.csv")
-    get_entityList(input_file="../processed_data/Test_Data.csv")
+    # get_entityList(input_file="../processed_data/Train_Data.csv")
+    # get_entityList(input_file="../processed_data/Test_Data.csv")
 
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/cls_sentence/",
@@ -214,8 +260,17 @@ def func():
     #               output_dir="../processed_data/ensemble_data/ner/",
     #               num_split=5, if_shuffle= False,type='ner')
 
-    gen_test_data(input_file="../processed_data/Test_Data.csv", 
-                  output_file="../processed_data/test.jsonl")
+    # gen_test_data(input_file="../processed_data/Test_Data.csv", 
+    #               output_file="../processed_data/test.jsonl")
+
+    # inspect_data(input_file="../processed_data/Train_Data.csv")
+
+    # inspect_data(input_file="../results/result.csv")
+    # 380
+
+    postprocess(input_file="../results/result.csv",
+                output_file="../results/result_processed.csv",)
+
 
     pass
 

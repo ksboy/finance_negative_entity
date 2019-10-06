@@ -79,17 +79,17 @@ class ClsEntity(object):
                 item ={}
                 item['id']=row['id']
                 item['passage'] = row['passage']
-                item['entity_list'] =[]
+                item['entity'] =[]
                 for entity in row['entity']:
-                    item['entity_list'].append(entity)
+                    item['entity'].append(entity)
                 # print(item)
                 items.append(item)
         
         outputs=[]
+        count = 0
         for item in tqdm(items, desc="正在预测", ncols=80):
             # item =json.loads(item)
             passage=item['passage']
-            negative_entity_list=[]
             output_item ={}
             output_item['id'] = item['id']
 
@@ -101,8 +101,20 @@ class ClsEntity(object):
                 output_item['entity'] = []
                 output_item['negative'] = 0 
             else:
-                # print("cls_entity")
-                for i, entity in enumerate(item['entity_list']):
+                entity_list = item['entity']
+                ## 去除重复 entity
+                pop_index = []
+                for i in range(len(entity_list)):
+                    for j in range(i+1, len(entity_list)):
+                        if entity_list[i] in entity_list[j]:
+                            if passage.count(entity_list[i]) == passage.count(entity_list[j]):
+                                count += 1
+                                pop_index.append(i)
+                entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
+
+                # 判断 negative_entity
+                negative_entity_list=[]
+                for i, entity in enumerate(entity_list):
                     entity_label_ensemble = []
                     for model in self.cls_entity_predictor_pool:
                         entity_label_ensemble.append(model.predict(passage[:512-3-2-len(entity)], entity))
@@ -110,10 +122,12 @@ class ClsEntity(object):
                     if entity_label=="正类":
                         negative_entity_list.append(entity)
                 # print(negative_entity_list)
-               
-            output_item['entity'] = negative_entity_list
-            output_item['negative'] = 0 if len(negative_entity_list)==0 else 1
+
+                output_item['entity'] = negative_entity_list
+                output_item['negative'] = 0 if len(negative_entity_list)==0 else 1
+       
             outputs.append(output_item)
+        print("去重 entity 的个数", count)
         
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write("id,negative,key_entity\n")
@@ -126,6 +140,10 @@ def func():
     cls_entity = ClsEntity()
     input_file  = '../data/processed_data/test.jsonl'
     output_file = '../data/results/result.csv'
+
+    # input_file  = '../data/processed_data/test_some.jsonl'
+    # output_file = '../data/results/result_some.csv'
+
     cls_entity.predict(input_file, output_file)
     pass
 
