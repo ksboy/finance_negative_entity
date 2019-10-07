@@ -90,28 +90,34 @@ class ClsEntity(object):
         for item in tqdm(items, desc="正在预测", ncols=80):
             # item =json.loads(item)
             passage=item['passage']
+            entity_list = item['entity']
+            ## 去除重复 entity
+            pop_index = []
+            for i in range(len(entity_list)):
+                for j in range(i+1, len(entity_list)):
+                    if entity_list[i] in entity_list[j] or entity_list[j] in entity_list[i]:
+                        if passage.count(entity_list[i]) == passage.count(entity_list[j]):
+                            print(item['id'], passage, 
+                                  entity_list[i], entity_list[j], 
+                                  passage.count(entity_list[i]),passage.count(entity_list[j]))
+                            count += 1
+                            if entity_list[i] in entity_list[j]:
+                                pop_index.append(i)
+                            else:
+                                pop_index.append(j)
+                    
+            entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
+
             output_item ={}
             output_item['id'] = item['id']
+            output_item['entity'] = []
+            output_item['negative'] = 0 
 
             sentence_label_ensemble = []
             for model in self.cls_sentence_predictor_pool:
                 sentence_label_ensemble.append(model.predict(passage[:512-3-2], ""))
             sentence_label = cls_entity_ensemble(sentence_label_ensemble)
-            if sentence_label == "负类":
-                output_item['entity'] = []
-                output_item['negative'] = 0 
-            else:
-                entity_list = item['entity']
-                ## 去除重复 entity
-                pop_index = []
-                for i in range(len(entity_list)):
-                    for j in range(i+1, len(entity_list)):
-                        if entity_list[i] in entity_list[j]:
-                            if passage.count(entity_list[i]) == passage.count(entity_list[j]):
-                                count += 1
-                                pop_index.append(i)
-                entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
-
+            if sentence_label == "正类":
                 # 判断 negative_entity
                 negative_entity_list=[]
                 for i, entity in enumerate(entity_list):

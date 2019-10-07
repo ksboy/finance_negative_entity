@@ -59,7 +59,7 @@
     "grad_norm": 5,
     "patience": 2,
     "num_serialized_models_to_keep": 1,
-    "validation_metric": "+accuracy",
+    "validation_metric": "+f1",
     "cuda_device": 1,
     "optimizer": {
       "type": "bert_adam",
