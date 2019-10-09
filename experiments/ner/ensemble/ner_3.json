@@ -4,18 +4,18 @@
         "tokenizers":{
             "bert_tokenizer":{
                 "type": "char_bert_tokenizer",
-                "vocab_file":"/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file":"/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
             }
         },
         "token_indexers":{
             "bert":{
                 "type": "char_bert_token_indexer",
-                "vocab_file": "/home/whou/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
             }
         }
     },
-  "train_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/ner/train_3.jsonl",
-  "validation_data_path": "/home/whou/workspace/code_repo/finance_negative_entity/data/processed_data/ensemble_data/ner/dev_3.jsonl",
+  "train_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/ner/train_3.jsonl",
+  "validation_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/ner/dev_3.jsonl",
     "model": {
         "type": "char_bert_crf",
         "dropout": 0.5,
@@ -27,7 +27,7 @@
             "token_embedders": {
                 "bert": {
                     "type": "bert-pretrained",
-                    "pretrained_model": "/home/whou/workspace/chinese_wwm_ext_pytorch",
+                    "pretrained_model": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch",
                     "requires_grad": true,
                     "top_layer_only": true
                 }
@@ -42,7 +42,7 @@
                 "num_tokens"
             ]
         ],
-        "batch_size": 4,
+        "batch_size": 8,
         "max_instances_in_memory": 600
     },
     "trainer": {
@@ -51,7 +51,7 @@
         "patience": 3,
         "num_serialized_models_to_keep": 1,
         "validation_metric": "+f1-measure-overall",
-        "cuda_device": 1,
+        "cuda_device": 0,
         "optimizer": {
             "type": "bert_adam",
             "lr": 2e-5,

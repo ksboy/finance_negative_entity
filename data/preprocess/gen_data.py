@@ -34,7 +34,7 @@ def gen_cleansed_data(text, entityList):
         for entity in entityList:
             if entity in topic and topic not in newtext:
                 newtext = newtext + topic + "。"  # 找出##之间的话题标签内容，筛选出与实体有关的保留下来。
-    text = re.sub(u"#.*?#", "", text)  # 去掉括号中内容
+    text = re.sub(u"#.*?#", "", text)  # 去##中内容
 
     words = pseg.cut(text)
     valid_wordList = ["，", "。", "：",",","、"]
@@ -102,6 +102,8 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
     items= []
     entity_length = []
     count = 0
+    entity_count = 0
+    empty_count = 0
     with open(input_file, encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         title = reader.fieldnames
@@ -128,10 +130,20 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                     item ={}
                     item['passage'] = row['text'][:512-3-2-len(entity)]
                     item['question'] = entity
+
+                    if item['passage'] == "":  # 去掉空passage
+                        empty_count += 1
+                        pass
+
+                    if entity not in item['passage']:  # 去掉不在text中的entity
+                        print(entity, item['passage'])
+                        entity_count += 1
+                        pass
+
                     if entity in row['key_entity']:
-                        item['label'] = '正类'
+                        item['label'] = '1'
                     else:
-                        item['label'] = '负类'
+                        item['label'] = '0'
                     items.append(item)
             elif level=="ner":
                 if len(row['text']) > 512-3-2:
@@ -157,6 +169,8 @@ def gen_ensemble_train_data(input_file = "../processed_data/Train_Data.csv",
                     
     print("max(entity_length)", max(entity_length))
     print("out_of_max_length", count)
+    print("empty_text",empty_count)
+    print("entity not in text", entity_count)
     if if_shuffle:
         random.shuffle(items)
     
@@ -194,6 +208,17 @@ def gen_test_data(input_file = "../processed_data/Test_Data.csv" ,
             items.append(item)
     write_file(items, output_file)
 
+def test():
+    # get_entityList(input_file="../processed_data/Train_Data.csv")
+    # get_entityList(input_file="../processed_data/Test_Data.csv")
+
+    text = "上海宜贷网，成都易捷金融，大股东任海华已逃亡美国，在任海华的遥控指挥下，龚卓、杨帆、冯涛（彭州致和镇）等人的诈骗团伙，打着良性退出的幌子，抢劫出借人的血汗钱，建立互助金资金池，平台再用自设的马甲号掏空，三万多受害人投诉无门，有人因此重病不起，抑郁，跪求公检法立案将犯罪分子绳之以法 ?,上海宜贷网，成都易捷金融，大股东任海华已逃亡美国，在任海华的遥控指挥下，龚卓、杨帆、冯涛（彭州致和镇）等人的诈骗团伙，打着良性退出的幌子，抢劫出借人的血汗钱，建立互助金资金池，平台再用自设的马甲号掏空，三万多受害人投诉无门，有人因此重病不起，抑郁，跪求公检法立案将犯罪分子绳之以法 ?"
+    entityList = "宜贷网(沪);易捷金融;宜贷网".split(";")
+    res = gen_cleansed_data(text, entityList)
+    print(res)
+
+
+
 def func():
 
     get_entityList()
@@ -202,18 +227,21 @@ def func():
     #               output_dir="../processed_data/ensemble_data/cls_sentence/",
     #               num_split=5, if_shuffle= False,level='cls_sentence')
     
-    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-    #               output_dir="../processed_data/ensemble_data/cls_entity/",
-    #               num_split=5, if_shuffle= False,level='cls_entity')
+    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
+                  output_dir="../processed_data/ensemble_data/cls_entity_transformer/",
+                  num_split=5, if_shuffle= True,level='cls_entity')
 
-    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
-                  output_dir="../processed_data/ensemble_data/ner/",
-                  num_split=5, if_shuffle= False,level='ner')
+    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
+    #               output_dir="../processed_data/ensemble_data/ner/",
+    #               num_split=5, if_shuffle= False,level='ner')
 
     # gen_test_data(input_file="../processed_data/Test_Data.csv", 
     #               output_file="../processed_data/test.jsonl")
 
+    # test()
+
     pass
+
 
 
 if __name__ == '__main__':
