@@ -1,0 +1,71 @@
+{
+  "dataset_reader": {
+        "type": "bert_seq_pair_cls",
+        "tokenizers":{
+            "bert_tokenizer":{
+                "type": "char_bert_tokenizer",
+                "vocab_file":"/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+            }
+        },
+        "token_indexers":{
+            "bert":{
+                "type": "char_bert_token_indexer",
+                "vocab_file": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+            }
+        }
+    },
+  "train_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence_10/train_5.jsonl",
+  "validation_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence_10/dev_5.jsonl",
+  "model": {
+    "type": "bert_seq_pair_clf_768",
+    "text_field_embedder": {
+            "allow_unmatched_keys": true,
+            "embedder_to_indexer_map": {
+                "bert": ["bert", null, "bert-type-ids"]
+            },
+            "token_embedders": {
+                "bert": {
+                    "type": "bert-pretrained",
+                    "pretrained_model": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/",
+                    "requires_grad": true,
+                    "top_layer_only": true
+                }
+            }
+    },
+    "classifier_feedforward": {
+      "input_dim": 768,
+      "num_layers": 3,
+      "hidden_dims": [
+        768,768,2
+      ],
+      "activations": [
+        "linear","relu","linear"
+      ]
+    }
+  },
+  "iterator": {
+    "type": "bucket",
+    "batch_size": 8,
+    "max_instances_in_memory": 600,
+    "sorting_keys": [
+      [
+        "content",
+        "num_tokens"
+      ]
+    ]
+  },
+  "trainer": {
+    "num_epochs": 20,
+    "grad_norm": 5,
+    "patience": 5,
+    "num_serialized_models_to_keep": 1,
+    "validation_metric": "+f1",
+    "cuda_device": 0,
+    "optimizer": {
+      "type": "bert_adam",
+      "lr": 2e-5,
+      "warmup": 0.1,
+      "t_total": 15000
+    }
+  }
+}

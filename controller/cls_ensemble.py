@@ -16,7 +16,7 @@ sys.path.append("../")
 from allennlp.models.archival import load_archive
 from allennlp.predictors import Predictor
 from typing import List
-# import finance_negative_entity 是必要的，虽然没有显式用到，但是它会告诉allennlp一个搜索路径。
+# import finance_negative_entity  # 是必要的，虽然没有显式用到，但是它会告诉allennlp一个搜索路径。
 import finance_negative_entity
 import time
 from tqdm import tqdm
@@ -43,12 +43,13 @@ class BertSeqPairClsEngine(object):
         result = self.predictor.predict(passage=passage.rstrip(), question=question)
         return result['label']
 
-CLS_ENTITY_MODEL_DIR = "/home/whou/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_"
-CLS_SENTENCE_MODEL_DIR = "/home/whou/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_"
-CLS_ENTITY_CUDA_DEVICE = 0
+
+CLS_ENTITY_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_ReLU_1536_"
+CLS_SENTENCE_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_1016_"
+CLS_ENTITY_CUDA_DEVICE = 1
 CLS_SENTENCE_CUDA_DEVICE = 1
-NUM_CLS_ENTITY_MODELS = 5
-NUM_CLS_SENTENCE_MODELS = 5
+NUM_CLS_ENTITY_MODELS = 8
+NUM_CLS_SENTENCE_MODELS = 10
 
 class ClsEntity(object):
     def __init__(self):
@@ -62,7 +63,7 @@ class ClsEntity(object):
         self.cls_sentence_predictor_pool = []
         for i in range(NUM_CLS_SENTENCE_MODELS):
             model_path = os.path.join(CLS_SENTENCE_MODEL_DIR+str(i+1), "model.tar.gz")
-            model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf", CLS_SENTENCE_CUDA_DEVICE)
+            model = BertSeqPairClsEngine(model_path, "bert_seq_pair_clf_768", CLS_SENTENCE_CUDA_DEVICE)
             self.cls_sentence_predictor_pool.append(model)
 
     def predict(self, input_file, output_file):
@@ -91,21 +92,21 @@ class ClsEntity(object):
             # item =json.loads(item)
             passage=item['passage']
             entity_list = item['entity']
-            ## 去除重复 entity
+            # 去除重复 entity
             pop_index = []
             for i in range(len(entity_list)):
                 for j in range(i+1, len(entity_list)):
                     if entity_list[i] in entity_list[j] or entity_list[j] in entity_list[i]:
                         if passage.count(entity_list[i]) == passage.count(entity_list[j]):
-                            print(item['id'], passage, 
-                                  entity_list[i], entity_list[j], 
-                                  passage.count(entity_list[i]),passage.count(entity_list[j]))
+                            # print(item['id'], passage,
+                            #       entity_list[i], entity_list[j],
+                            #       passage.count(entity_list[i]),passage.count(entity_list[j]))
                             count += 1
                             if entity_list[i] in entity_list[j]:
                                 pop_index.append(i)
                             else:
                                 pop_index.append(j)
-                    
+
             entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
 
             output_item ={}
@@ -125,7 +126,7 @@ class ClsEntity(object):
                     for model in self.cls_entity_predictor_pool:
                         entity_label_ensemble.append(model.predict(passage[:512-3-2-len(entity)], entity))
                     entity_label = cls_entity_ensemble(entity_label_ensemble)
-                    if entity_label=="正类":
+                    if entity_label == "正类":
                         negative_entity_list.append(entity)
                 # print(negative_entity_list)
 
@@ -144,8 +145,8 @@ class ClsEntity(object):
 
 def func():
     cls_entity = ClsEntity()
-    input_file  = '../data/processed_data/test.jsonl'
-    output_file = '../data/results/result.csv'
+    input_file  = '../data/processed_data/test_cleansed_1015.jsonl'
+    output_file = '../data/results/result_test_cleansed1_1536_1016.csv'
 
     # input_file  = '../data/processed_data/test_some.jsonl'
     # output_file = '../data/results/result_some.csv'
