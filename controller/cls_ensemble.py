@@ -45,11 +45,11 @@ class BertSeqPairClsEngine(object):
 
 
 CLS_ENTITY_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_ReLU_1536_"
-CLS_SENTENCE_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_1016_"
-CLS_ENTITY_CUDA_DEVICE = 1
-CLS_SENTENCE_CUDA_DEVICE = 1
-NUM_CLS_ENTITY_MODELS = 8
-NUM_CLS_SENTENCE_MODELS = 10
+CLS_SENTENCE_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_ReLU_"
+CLS_ENTITY_CUDA_DEVICE = 0
+CLS_SENTENCE_CUDA_DEVICE = 0
+NUM_CLS_ENTITY_MODELS = 1
+NUM_CLS_SENTENCE_MODELS = 1
 
 class ClsEntity(object):
     def __init__(self):
@@ -146,7 +146,7 @@ class ClsEntity(object):
 def func():
     cls_entity = ClsEntity()
     input_file  = '../data/processed_data/test_cleansed_1015.jsonl'
-    output_file = '../data/results/result_test_cleansed1_1536_1016.csv'
+    output_file = '../data/results/result_test_cleansed1_1536_predict6_1024.csv'
 
     # input_file  = '../data/processed_data/test_some.jsonl'
     # output_file = '../data/results/result_some.csv'

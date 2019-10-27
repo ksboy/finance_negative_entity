@@ -4,20 +4,20 @@
         "tokenizers":{
             "bert_tokenizer":{
                 "type": "char_bert_tokenizer",
-                "vocab_file":"/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file":"/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         },
         "token_indexers":{
             "bert":{
                 "type": "char_bert_token_indexer",
-                "vocab_file": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         }
     },
   "train_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence_10/train_4.jsonl",
   "validation_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_sentence_10/dev_4.jsonl",
   "model": {
-    "type": "bert_seq_pair_clf_768",
+    "type": "bert_seq_pair_clf",
     "text_field_embedder": {
             "allow_unmatched_keys": true,
             "embedder_to_indexer_map": {
@@ -26,7 +26,7 @@
             "token_embedders": {
                 "bert": {
                     "type": "bert-pretrained",
-                    "pretrained_model": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/",
+                    "pretrained_model": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/",
                     "requires_grad": true,
                     "top_layer_only": true
                 }
@@ -60,7 +60,7 @@
     "patience": 5,
     "num_serialized_models_to_keep": 1,
     "validation_metric": "+f1",
-    "cuda_device": 0,
+    "cuda_device": [1,2],
     "optimizer": {
       "type": "bert_adam",
       "lr": 2e-5,

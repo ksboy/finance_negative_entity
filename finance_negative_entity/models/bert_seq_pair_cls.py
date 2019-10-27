@@ -24,7 +24,7 @@ from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.training.metrics import CategoricalAccuracy, F1Measure
 
 logger = logging.getLogger(__name__)
-device = torch.device('cuda:0')
+device = torch.device('cuda:1')
 
 # logger.setLevel(logging.DEBUG)
 
@@ -112,22 +112,24 @@ class BertSeqPairClsfModel(Model):
             if word_vec_list:  # 如果passage中能找着entity
                 word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
             else:  # passage中没有entity
-                for j in range(len(passage_tensor)):
-                    if passage_tensor[j] in question_tensor:
-                        word_vec_list.append(embeded_content[i,j,:])
-                if not word_vec_list:
-                    word_vec_mean = torch.zeros(768)
-                else:
-                    word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
+                # for j in range(len(passage_tensor)):
+                #     if passage_tensor[j] in question_tensor:
+                #         word_vec_list.append(embeded_content[i,j,:])
+                # if not word_vec_list:
+                #     word_vec_mean = torch.zeros(768)
+                # else:
+                #     word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
+                word_vec_mean = torch.zeros(768)
             cls_vec = cls_vec.to(device)
             word_vec_mean = word_vec_mean.to(device)
             bert_vec = torch.cat((cls_vec, word_vec_mean), 0)  # 合并之后的向量，dim=768*2
             bert_vec_list.append(bert_vec)
         final_vec = torch.stack(bert_vec_list, 0)
+        logits = self.classifier_feedforward(final_vec)
 
         # cls_vec = embeded_content[:,0,:]
+        # logits = self.classifier_feedforward(cls_vec)
 
-        logits = self.classifier_feedforward(final_vec)
         output_dict = {'logits': logits}
 
         if label is not None:
@@ -159,6 +161,10 @@ class BertSeqPairClsfModel(Model):
 
         predictions = class_probabilities.cpu().data.numpy()
         argmax_indices = numpy.argmax(predictions, axis=-1)
+        # if predictions[0][1] >= 0.6:
+        #     argmax_indices = [1]
+        # else:
+        #     argmax_indices = [0]
         # 如果label是str则需要以下这两行
         labels = [self.vocab.get_token_from_index(x, namespace='labels') for x in argmax_indices]
         output_dict['label'] = labels

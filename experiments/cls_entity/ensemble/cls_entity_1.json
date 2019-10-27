@@ -4,13 +4,13 @@
         "tokenizers":{
             "bert_tokenizer":{
                 "type": "char_bert_tokenizer",
-                "vocab_file":"/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file":"/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         },
         "token_indexers":{
             "bert":{
                 "type": "char_bert_token_indexer",
-                "vocab_file": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/vocab.txt"
+                "vocab_file": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
             }
         }
     },
@@ -26,7 +26,7 @@
             "token_embedders": {
                 "bert": {
                     "type": "bert-pretrained",
-                    "pretrained_model": "/home/mhxia/xmh/workspace/chinese_wwm_ext_pytorch/",
+                    "pretrained_model": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/",
                     "requires_grad": true,
                     "top_layer_only": true
                 }
@@ -34,12 +34,12 @@
     },
     "classifier_feedforward": {
       "input_dim": 1536,
-      "num_layers": 2,
+      "num_layers": 3,
       "hidden_dims": [
-        1536,2
+        1536,1536,2
       ],
       "activations": [
-        "relu","linear"
+        "linear","relu","linear"
       ]
     }
   },
@@ -72,10 +72,10 @@
     "patience": 4,
     "num_serialized_models_to_keep": 1,
     "validation_metric": "+f1",
-    "cuda_device": 0,
+    "cuda_device": 1,
     "optimizer": {
       "type": "bert_adam",
-      "lr": 2e-5,
+      "lr": 3e-5,
       "warmup": 0.1,
       "t_total": 15000
     }

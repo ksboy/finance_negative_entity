@@ -51,7 +51,7 @@ class BertSeqPairClsEngine(object):
         return result['label']
 
 
-CLS_SENTENCE_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_model_ReLU_"
+CLS_SENTENCE_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_sentence/cls_sentence_roberta_relu_1024_"
 CLS_SENTENCE_CUDA_DEVICE = 1
 NUM_CLS_SENTENCE_MODELS = 10
 
@@ -148,7 +148,7 @@ class ClsEntity(object):
 def func():
     cls_entity = ClsEntity()
     input_file = '../data/processed_data/test_cleansed_1015.jsonl'
-    output_file = '../data/results/result_sentence_1016.jsonl'
+    output_file = '../data/results/result_sentence_roberta_logits6_1024.jsonl'
 
     # input_file  = '../data/processed_data/test_some.jsonl'
     # output_file = '../data/results/result_some.csv'

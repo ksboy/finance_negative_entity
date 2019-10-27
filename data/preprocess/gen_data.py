@@ -329,13 +329,13 @@ def inspect_data(input_file="../processed_data/Train_Data.csv"):
 #     print(count)
 
 def func():
-    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
-    #               output_dir="../processed_data/ensemble_data/cls_sentence_11/",
-    #               num_split=5, if_shuffle=True, type='cls_sentence')
-    #
     gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
-                            output_dir="../processed_data/ensemble_data/cls_entity_10/",
-                            num_split=5, if_shuffle=True, type='cls_entity')
+                  output_dir="../processed_data/ensemble_data/cls_sentence_10/",
+                  num_split=5, if_shuffle=True, type='cls_sentence')
+    #
+    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
+    #                         output_dir="../processed_data/ensemble_data/cls_entity_10/",
+    #                         num_split=5, if_shuffle=True, type='cls_entity')
 
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/ner/",

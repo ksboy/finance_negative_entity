@@ -24,7 +24,7 @@ from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.training.metrics import CategoricalAccuracy, F1Measure
 
 logger = logging.getLogger(__name__)
-device = torch.device('cuda:1')
+device = torch.device('cuda:0')
 
 # logger.setLevel(logging.DEBUG)
 
