@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="116">
+  <component name="PublishConfigData" autoUpload="Always" serverName="119">
     <serverData>
       <paths name="116">
         <serverdata>
           <mappings>
             <mapping deploy="/BDCI/finance_negative_entity" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="119">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/minghongxia/BDCI/finance_negative_entity" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
