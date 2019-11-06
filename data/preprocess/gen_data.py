@@ -120,13 +120,46 @@ def get_entityList(input_file="../processed_data/Train_Data.csv"):
     return entityList
 
 
+def gen_del_entity(input_file):
+    key_entity_dict = {}
+    entity_dict = {}
+    del_entity_list = []
+    with open(input_file, encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        title = reader.fieldnames
+        for row in reader:
+            entity_list = row['entity'].split(";")
+            key_entity_list = row['key_entity'].split(";")
+            for entity in entity_list:
+                if entity_dict.get(entity,-1) != -1:
+                    entity_dict[entity] += 1
+                else:
+                    entity_dict[entity] = 1
+            for key_entity in key_entity_list:
+                if key_entity_dict.get(key_entity,-1) != -1:
+                    key_entity_dict[key_entity] += 1
+                else:
+                    key_entity_dict[key_entity] = 1
+
+        del entity_dict['']
+        del key_entity_dict['']
+
+        for entity in key_entity_dict.keys():
+            if key_entity_dict[entity]>3 and key_entity_dict[entity] > entity_dict[entity] * 0.7:
+                del_entity_list.append(entity)
+    return del_entity_list
+
+
 def gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
                             output_dir="../processed_data/ensemble_data/cls_entity/",
                             num_split=5, if_shuffle=False, type="cls_entity"):
     items = []
     entity_length = []
     count = 0
+    del_count = 0
     entity_not_in_passage = 0
+    flag = False
+    del_entity_list = gen_del_entity(input_file)
     with open(input_file, encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         title = reader.fieldnames
@@ -140,7 +173,6 @@ def gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
             key_entity_list = row['key_entity'].split(";")
             while '' in key_entity_list:
                 key_entity_list.remove('')
-
             text = gen_cleansed_data(text, entity_list)  # 清洗数据
             entity_length.extend([len(entity) for entity in entity_list])
             if type == 'cls_sentence':
@@ -157,6 +189,9 @@ def gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
                 items.append(item)
             elif type == "cls_entity":
                 for entity in entity_list:
+                    if entity in del_entity_list:
+                        del_count += 1
+                        continue
                     if len(text) + len(entity) > 512 - 3 - 2:
                         count += 1
                     item = {}
@@ -191,6 +226,7 @@ def gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
     print("max(entity_length)", max(entity_length))
     print("count(out_of_max_length)", count)
     print("entity not in passage", entity_not_in_passage)
+    print("delete_entity", del_count)
     if if_shuffle:
         random.shuffle(items)
 
@@ -302,47 +338,21 @@ def inspect_data(input_file="../processed_data/Train_Data.csv"):
     print(count)
 
 
-# def postprocess(input_file, output_file):
-
-#     outfile = open(output_file, 'w', encoding='utf-8')
-
-#     with open(input_file, encoding='utf-8') as csvfile:
-#         reader = csv.DictReader(csvfile)
-#         title = reader.fieldnames
-#         writer= csv.DictWriter(outfile, title)
-
-#         count = 0
-#         for row in reader:
-#             print(row)
-#             pop_index=[]
-#             entity_list = row["key_entity"].split(";")
-#             for i in range(len(entity_list)):
-#                 for j in range(i+1, len(entity_list)):
-#                     if entity_list[i] in entity_list[j]:
-#                         if row["text"].count(entity_list[i]) == row["text"].count(entity_list[j]):
-#                             count +=1
-#                             pop_index.append(i)
-#             entity_list = [entity_list[i] for i in range(len(entity_list)) if (i not in pop_index)]
-#             row["key_entity"]=  ";".join(entity_list)
-#             writer.writerow(row)
-
-#     print(count)
-
 def func():
-    gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
-                  output_dir="../processed_data/ensemble_data/cls_sentence_10/",
-                  num_split=5, if_shuffle=True, type='cls_sentence')
+    # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
+    #               output_dir="../processed_data/ensemble_data/cls_sentence_1030/",
+    #               num_split=5, if_shuffle=True, type='cls_sentence')
     #
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv",
-    #                         output_dir="../processed_data/ensemble_data/cls_entity_10/",
+    #                         output_dir="../processed_data/ensemble_data/cls_entity_1030/",
     #                         num_split=5, if_shuffle=True, type='cls_entity')
 
     # gen_ensemble_train_data(input_file="../processed_data/Train_Data.csv", 
     #               output_dir="../processed_data/ensemble_data/ner/",
     #               num_split=5, if_shuffle= False,type='ner')
 
-    # gen_test_data(input_file="../processed_data/Test_Data.csv",
-    #               output_file="../processed_data/test_cleansed_1015.jsonl")
+    gen_test_data(input_file="../processed_data/ensemble_data/cls_entity/dev_1.jsonl",
+                  output_file="../processed_data/dev_test.jsonl")
 
     pass
 

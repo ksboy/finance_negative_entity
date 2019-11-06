@@ -52,7 +52,9 @@ def gen_large_result_entity(input_file, output_file, test_file):
                     if currentity in entity and currentity != entity:
                         if currentity in key_entity_list:
                             key_entity_list.remove(currentity)
+                            print(row)
                             count += 1
+            
             row["key_entity"] = ";".join(key_entity_list)
             rows.append(row)
         print(count)
@@ -157,9 +159,9 @@ if __name__ == '__main__':
 
     # compare_result('../data/results/result_sentence_entity.csv', '../data/results/result.csv')
 
-    gen_large_result_entity(input_file="/home/mhxia/BDCI/finance_negative_entity/data/results/result_test_cleansed1_roberta_logits6_1024.csv",
-                            output_file="/home/mhxia/BDCI/finance_negative_entity/data/results/result_test_cleansed2_roberta_logits6_1024.csv",
-                            test_file="/home/mhxia/BDCI/finance_negative_entity/data/processed_data/test_cleansed_1015.jsonl")
+    gen_large_result_entity(input_file="/home/minghongxia/BDCI/finance_negative_entity/data/results/result_test_cleansed1_roberta_logits6_1024.csv",
+                            output_file="/home/minghongxia/BDCI/finance_negative_entity/data/results/result_test_cleansed2_roberta_logits6_1024.csv",
+                            test_file="/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/test_cleansed_1015.jsonl")
 
     # check_test_file(input_file="/home/mhxia/BDCI/finance_negative_entity/data/processed_data/test.jsonl",
     #                 output_file="/home/mhxia/BDCI/finance_negative_entity/data/processed_data/test_cleansed.jsonl")

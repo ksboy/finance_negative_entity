@@ -46,9 +46,9 @@ class BertSeqPairClsEngine(object):
         return result['label']
 
 
-CLS_ENTITY_MODEL_DIR = "/home/mhxia/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_ReLU_1536_"
-CLS_ENTITY_CUDA_DEVICE = 1
-NUM_CLS_ENTITY_MODELS = 8
+CLS_ENTITY_MODEL_DIR = "/home/minghongxia/workspace/my_models/finance_negative_entity/cls_entity/cls_entity_model_ReLU_1536_"
+CLS_ENTITY_CUDA_DEVICE = 3
+NUM_CLS_ENTITY_MODELS = 1
 
 
 class ClsEntity(object):
@@ -78,7 +78,8 @@ class ClsEntity(object):
                 item = {}
                 item['id'] = row['id']
                 item['passage'] = row['passage']
-                item['negative'] = row['negative']
+                # item['negative'] = row['negative']
+                item['negative'] = 1
                 item['entity'] = []
                 for entity in row['entity']:
                     item['entity'].append(entity)
@@ -126,7 +127,6 @@ class ClsEntity(object):
                     entity_label = cls_entity_ensemble(entity_label_ensemble)
                     if entity_label == "正类":
                         negative_entity_list.append(entity)
-                # print(negative_entity_list)
 
                 output_item['entity'] = negative_entity_list
                 output_item['negative'] = 0 if len(negative_entity_list) == 0 else 1
@@ -168,8 +168,11 @@ class ClsEntity(object):
 
 def func():
     cls_entity = ClsEntity()
-    input_file = '../data/results/result_sentence_roberta_logits6_1024.jsonl'
-    output_file = '../data/results/result_test_cleansed1_roberta_logits6_1024.csv'
+    # input_file = '../data/results/result_sentence_roberta_logits6_1024.jsonl'
+    # output_file = '../data/results/result_test_cleansed1_roberta_logits6_1024.csv'
+
+    input_file = "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_1.jsonl"
+    output_file = "/home/minghongxia/BDCI/finance_negative_entity/data/results/dev_test.csv"
 
     # input_file  = '../data/processed_data/test_some.jsonl'
     # output_file = '../data/results/result_some.csv'

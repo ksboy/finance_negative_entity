@@ -11,4 +11,3 @@
 """
 
 from finance_negative_entity.predictors.bert_seq_pair_cls import BertSeqPairClsPredictor
-from finance_negative_entity.predictors.bert_seq_pair_cls_768 import BertSeqPairClsPredictor_768

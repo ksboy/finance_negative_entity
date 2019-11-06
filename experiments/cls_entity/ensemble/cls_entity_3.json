@@ -4,18 +4,18 @@
         "tokenizers":{
             "bert_tokenizer":{
                 "type": "char_bert_tokenizer",
-                "vocab_file":"/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
+                "vocab_file":"/home/minghongxia/workspace/BDCI/chinese_wwm_ext_pytorch/vocab.txt"
             }
         },
         "token_indexers":{
             "bert":{
                 "type": "char_bert_token_indexer",
-                "vocab_file": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/vocab.txt"
+                "vocab_file": "/home/minghongxia/workspace/BDCI/chinese_wwm_ext_pytorch/vocab.txt"
             }
         }
     },
-  "train_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_3.jsonl",
-  "validation_data_path": "/home/mhxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_3.jsonl",
+  "train_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_1030/train_3.jsonl",
+  "validation_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_1030/dev_3.jsonl",
   "model": {
     "type": "bert_seq_pair_clf",
     "text_field_embedder": {
@@ -26,26 +26,26 @@
             "token_embedders": {
                 "bert": {
                     "type": "bert-pretrained",
-                    "pretrained_model": "/home/mhxia/xmh/workspace/RoBERTa_zh_L12_PyTorch/",
+                    "pretrained_model": "/home/minghongxia/workspace/BDCI/chinese_wwm_ext_pytorch/",
                     "requires_grad": true,
                     "top_layer_only": true
                 }
             }
     },
     "classifier_feedforward": {
-      "input_dim": 1536,
-      "num_layers": 3,
+      "input_dim": 768,
+      "num_layers": 1,
       "hidden_dims": [
-        1536,1536,2
+        2
       ],
       "activations": [
-        "linear","relu","linear"
+        "linear"
       ]
     }
   },
   "iterator": {
     "type": "bucket",
-    "batch_size": 8,
+    "batch_size": 4,
     "instances_per_epoch": 3000,
     "max_instances_in_memory": 600,
     "sorting_keys": [
@@ -57,7 +57,7 @@
   },
   "validation_iterator": {
     "type": "bucket",
-    "batch_size": 8,
+    "batch_size": 4,
     "max_instances_in_memory": 600,
     "sorting_keys": [
       [
@@ -69,10 +69,10 @@
   "trainer": {
     "num_epochs": 20,
     "grad_norm": 5,
-    "patience": 4,
+    "patience": 5,
     "num_serialized_models_to_keep": 1,
     "validation_metric": "+f1",
-    "cuda_device": 1,
+    "cuda_device": 5,
     "optimizer": {
       "type": "bert_adam",
       "lr": 2e-5,

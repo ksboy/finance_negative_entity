@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Remote Python 3.6.9 (sftp://minghongxia@10.10.255.119:22/home/minghongxia/anaconda3/envs/Allennlp/bin/python3.6)" jdkType="Python SDK" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/finance_negative_entity/models" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="finance_negative_entity_119" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">

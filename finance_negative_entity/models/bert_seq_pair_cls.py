@@ -23,8 +23,10 @@ from allennlp.modules import FeedForward, TextFieldEmbedder
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.training.metrics import CategoricalAccuracy, F1Measure
 
+# from FocalLoss import FocalLoss
+
 logger = logging.getLogger(__name__)
-device = torch.device('cuda:1')
+# device = torch.device('cuda:5')
 
 # logger.setLevel(logging.DEBUG)
 
@@ -59,6 +61,7 @@ class BertSeqPairClsfModel(Model):
         # weights = torch.Tensor(class_weights)
         self.loss = torch.nn.CrossEntropyLoss()
         initializer(self)
+        # self.loss = FocalLoss()
 
     @overrides
     def forward(self,
@@ -67,12 +70,69 @@ class BertSeqPairClsfModel(Model):
                 label: torch.LongTensor = None,
                 metadata: List[Dict[str, str]] = None) -> Dict[str, Any]:
 
-        embeded_content = self._text_field_embedder(content)
+        # print(content)
+        # embeded_content = self._text_field_embedder(content)
         """
         在passage里面找完整的question，如果找不到的话（即text中没有entity），则padding=0
         """
+        # batch_size = len(content['bert'])
+        # batch_index_list = []
+        # for i in range(batch_size):  # 依次处理batch中每一个句子向量
+        #     whole_sentence_tensor = content['bert'][i]
+        #     index = 0
+        #     for j in range(len(whole_sentence_tensor)):  # 找到SEP的index
+        #         if whole_sentence_tensor[j] == 102:
+        #             index = j
+        #             break
+        #     index_0 = len(whole_sentence_tensor)  # 在batch中，会取input的最长长度做batch长度，并padding=0
+        #     for j in range(len(whole_sentence_tensor)):
+        #         if whole_sentence_tensor[j] == 0:
+        #             index_0 = j
+        #             break
+        #     passage_tensor = whole_sentence_tensor[:index]  # passage的tensor
+        #     question_tensor = whole_sentence_tensor[index + 1:index_0]  # question的tensor，并去掉结尾的padding=0
+        #     index_list = []  # 找到passage中question出现的索引
+        #     for a in range(len(passage_tensor)-len(question_tensor)):
+        #         flag = True
+        #         for b in range(len(question_tensor)):
+        #             if passage_tensor[a + b] != question_tensor[b]:
+        #                 flag = False
+        #                 break
+        #         if flag:
+        #             index_list.append(a)
+        #     batch_index_list.append(index_list)
+        # bert_vec_list = []
+        # for i in range(batch_size):
+        #     word_vec_list = []
+        #     for j in batch_index_list[i]:
+        #         for k in range(len(question_tensor)):
+        #             try:
+        #                 word_vec_list.append(embeded_content[i, j + k, :])
+        #             except IndexError:
+        #                 pass
+        #
+        #     # 以下是两种方法共用代码
+        #     cls_vec = embeded_content[i, 0, :]  # 获得cls向量
+        #     if word_vec_list:  # 如果passage中能找着entity
+        #         word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
+        #     else:  # passage中没有entity
+        #         # for j in range(len(passage_tensor)):
+        #         #     if passage_tensor[j] in question_tensor:
+        #         #         word_vec_list.append(embeded_content[i,j,:])
+        #         # if not word_vec_list:
+        #         #     word_vec_mean = torch.zeros(768)
+        #         # else:
+        #         #     word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
+        #         word_vec_mean = torch.zeros(768)
+        #     cls_vec = cls_vec.to(device)
+        #     word_vec_mean = word_vec_mean.to(device)
+        #     bert_vec = torch.cat((cls_vec, word_vec_mean), 0)  # 合并之后的向量，dim=768*2
+        #     bert_vec_list.append(bert_vec)
+        # final_vec = torch.stack(bert_vec_list, 0)
+        # logits = self.classifier_feedforward(final_vec)
+
         batch_size = len(content['bert'])
-        batch_index_list = []
+        # print(content)
         for i in range(batch_size):  # 依次处理batch中每一个句子向量
             whole_sentence_tensor = content['bert'][i]
             index = 0
@@ -88,7 +148,7 @@ class BertSeqPairClsfModel(Model):
             passage_tensor = whole_sentence_tensor[:index]  # passage的tensor
             question_tensor = whole_sentence_tensor[index + 1:index_0]  # question的tensor，并去掉结尾的padding=0
             index_list = []  # 找到passage中question出现的索引
-            for a in range(len(passage_tensor)-len(question_tensor)):
+            for a in range(len(passage_tensor) - len(question_tensor)):
                 flag = True
                 for b in range(len(question_tensor)):
                     if passage_tensor[a + b] != question_tensor[b]:
@@ -96,39 +156,25 @@ class BertSeqPairClsfModel(Model):
                         break
                 if flag:
                     index_list.append(a)
-            batch_index_list.append(index_list)
-        bert_vec_list = []
-        for i in range(batch_size):
-            word_vec_list = []
-            for j in batch_index_list[i]:
+            for a in index_list:
                 for k in range(len(question_tensor)):
                     try:
-                        word_vec_list.append(embeded_content[i, j + k, :])
+                        content['bert-type-ids'][i][a + k] = 1
                     except IndexError:
                         pass
+            # print(len(content['bert'][i]))
+            # print(len(content['bert-type-ids'][i]))
+            # print(len(content['mask'][i]))
+            for j in range(index + 1, len(content['bert'][i])):
+                content['bert'][i][j] = 0
+            for j in range(index + 1, len(content['bert'][i])):
+                content['bert-type-ids'][i][j] = 0
+            for j in range(index + 1, len(content['bert'][i])):
+                content['mask'][i][j] = 0
 
-            # 以下是两种方法共用代码
-            cls_vec = embeded_content[i, 0, :]  # 获得cls向量
-            if word_vec_list:  # 如果passage中能找着entity
-                word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
-            else:  # passage中没有entity
-                # for j in range(len(passage_tensor)):
-                #     if passage_tensor[j] in question_tensor:
-                #         word_vec_list.append(embeded_content[i,j,:])
-                # if not word_vec_list:
-                #     word_vec_mean = torch.zeros(768)
-                # else:
-                #     word_vec_mean = torch.mean(torch.stack(word_vec_list), 0)
-                word_vec_mean = torch.zeros(768)
-            cls_vec = cls_vec.to(device)
-            word_vec_mean = word_vec_mean.to(device)
-            bert_vec = torch.cat((cls_vec, word_vec_mean), 0)  # 合并之后的向量，dim=768*2
-            bert_vec_list.append(bert_vec)
-        final_vec = torch.stack(bert_vec_list, 0)
-        logits = self.classifier_feedforward(final_vec)
-
-        # cls_vec = embeded_content[:,0,:]
-        # logits = self.classifier_feedforward(cls_vec)
+        embeded_content = self._text_field_embedder(content)
+        cls_vec = embeded_content[:,0,:]
+        logits = self.classifier_feedforward(cls_vec)
 
         output_dict = {'logits': logits}
 

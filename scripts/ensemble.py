@@ -17,7 +17,7 @@ def cls_entity_ensemble(cls_tags: List[str]):
     if len(cls_tags) == 0:
         return None
     tag, count = Counter(cls_tags).most_common(1)[0]
-    if tag == "正类" and count >= len(cls_tags)//2 + 1:
+    if tag == "正类" and count >= len(cls_tags)//2:
         return tag
     else:
         return "负类"

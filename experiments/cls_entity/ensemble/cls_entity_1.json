@@ -14,8 +14,8 @@
             }
         }
     },
-  "train_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/train_1.jsonl",
-  "validation_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity/dev_1.jsonl",
+  "train_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_1030/train_1.jsonl",
+  "validation_data_path": "/home/minghongxia/BDCI/finance_negative_entity/data/processed_data/ensemble_data/cls_entity_1030/dev_1.jsonl",
   "model": {
     "type": "bert_seq_pair_clf",
     "text_field_embedder": {
@@ -33,19 +33,19 @@
             }
     },
     "classifier_feedforward": {
-      "input_dim": 1536,
-      "num_layers": 3,
+      "input_dim": 768,
+      "num_layers": 1,
       "hidden_dims": [
-        1536,1536,2
+        2
       ],
       "activations": [
-        "linear","relu","linear"
+        "linear"
       ]
     }
   },
   "iterator": {
     "type": "bucket",
-    "batch_size": 8,
+    "batch_size": 4,
     "instances_per_epoch": 3000,
     "max_instances_in_memory": 600,
     "sorting_keys": [
@@ -57,7 +57,7 @@
   },
   "validation_iterator": {
     "type": "bucket",
-    "batch_size": 8,
+    "batch_size": 4,
     "max_instances_in_memory": 600,
     "sorting_keys": [
       [
@@ -69,13 +69,13 @@
   "trainer": {
     "num_epochs": 20,
     "grad_norm": 5,
-    "patience": 4,
+    "patience": 5,
     "num_serialized_models_to_keep": 1,
     "validation_metric": "+f1",
-    "cuda_device": 1,
+    "cuda_device": 5,
     "optimizer": {
       "type": "bert_adam",
-      "lr": 3e-5,
+      "lr": 2e-5,
       "warmup": 0.1,
       "t_total": 15000
     }
